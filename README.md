@@ -17,6 +17,7 @@ AfriSpeech is a research project focused on building:
 - Full preprocessing & evaluation pipeline
 
 ### Repository Structure
+```
 kasanoma-asr/
 │
 ├── data/
@@ -68,6 +69,8 @@ kasanoma-asr/
 ├── environment.yml
 ├── LICENSE
 └── .gitignore
+
+```
 
 
 ### Setup
