@@ -1,0 +1,26 @@
+name: kasanoma-asr
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchaudio
+  - cudatoolkit
+  - pip
+  - pip:
+      - transformers
+      - datasets
+      - accelerate
+      - soundfile
+      - librosa
+      - jiwer
+      - pydub
+      - audiomentations
+      - noisereduce
+      - git+https://github.com/openai/whisper.git
+      - faster-whisper
+      - huggingface_hub
+      - sentencepiece
+      - evaluate
+      - onnxruntime-gpu
