@@ -1,10 +1,10 @@
 {
   "placeholderImages": [
     {
-      "id": "afrivoice-prompt-1",
-      "description": "A vibrant village scene in Africa, with people walking and traditional huts in the background.",
-      "imageUrl": "https://images.unsplash.com/photo-1695998225616-baed0c08988c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx2aWxsYWdlJTIwc2NlbmV8ZW58MHx8fHwxNzY0MDY4NjMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "village scene"
+      "id": "ghana-market-1",
+      "description": "A bustling, colorful market scene in Accra, Ghana, with vendors selling fresh produce and textiles.",
+      "imageUrl": "https://images.unsplash.com/photo-1594480852445-3b6d057d14c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaGFuYSUyMG1hcmtldCUyMHNjZW5lfGVufDB8fHx8MTcyMDY1MzQ1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Ghana market"
     }
   ]
 }

@@ -2,9 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw } from "lucide-react";
+import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { prompts, type Prompt } from "@/lib/prompts";
 import { useToast } from "@/hooks/use-toast";
@@ -22,30 +23,53 @@ const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.le
 
 export default function RecordingInterface({ userData, onStartOver }: RecordingInterfaceProps) {
   const [prompt, setPrompt] = useState<Prompt>(() => getRandomItem(prompts));
-  const [showSwahili, setShowSwahili] = useState(false);
+  const [showSwahili, setShowSwahili] = useState(false); // Note: The prompt data now uses 'otherLanguage'
   const { toast } = useToast();
 
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [hasMicPermission, setHasMicPermission] = useState<boolean | null>(null);
 
-  const imagePrompt = PlaceHolderImages.find(img => img.id === 'afrivoice-prompt-1');
+  const imagePrompt = PlaceHolderImages.find(img => img.id === 'ghana-market-1');
 
+  // Request microphone permission on component mount
   useEffect(() => {
-    // Cleanup function to stop media stream and revoke URL
+    const getMicPermission = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        setHasMicPermission(true);
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+        setHasMicPermission(false);
+        toast({
+          variant: "destructive",
+          title: "Microphone Access Denied",
+          description: "Please allow microphone access in your browser settings to continue.",
+        });
+      }
+    };
+
+    getMicPermission();
+
+    // Cleanup function to stop media stream
     return () => {
-      if (mediaRecorderRef.current?.stream) {
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
     };
-  }, [audioUrl]);
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleStartRecording = async () => {
-    if (recordingStatus === "recording") return;
+  const handleStartRecording = () => {
+    if (recordingStatus === "recording" || !streamRef.current || !hasMicPermission) return;
+    
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
@@ -53,37 +77,25 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
     setRecordingStatus("recording");
     audioChunksRef.current = [];
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+    // Re-use the existing stream
+    mediaRecorderRef.current = new MediaRecorder(streamRef.current);
 
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
+    mediaRecorderRef.current.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunksRef.current.push(event.data);
+      }
+    };
 
-      mediaRecorderRef.current.onstop = () => {
-        setRecordingStatus("processing");
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        setRecordingStatus("recorded");
-        
-        // Stop all media tracks after processing is done
-        stream.getTracks().forEach(track => track.stop());
-      };
+    mediaRecorderRef.current.onstop = () => {
+      setRecordingStatus("processing");
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const url = URL.createObjectURL(audioBlob);
+      setAudioUrl(url);
+      setRecordingStatus("recorded");
+      // We don't stop the tracks here anymore, so the stream can be reused.
+    };
 
-      mediaRecorderRef.current.start();
-    } catch (err) {
-      console.error("Error accessing microphone:", err);
-      toast({
-        variant: "destructive",
-        title: "Microphone Access Denied",
-        description: "Please allow microphone access in your browser settings to continue.",
-      });
-      setRecordingStatus("idle");
-    }
+    mediaRecorderRef.current.start();
   };
 
   const handleStopRecording = () => {
@@ -102,10 +114,17 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
   };
 
   const RecordButton = () => {
+    const isDisabled = hasMicPermission === false || hasMicPermission === null;
+    let title = "Start recording";
+    if (isDisabled) title = "Microphone not available";
+    if (recordingStatus === 'recording') title = "Stop recording";
+    if (recordingStatus === 'processing') title = "Processing...";
+
+
     switch (recordingStatus) {
       case "recording":
         return (
-          <Button onClick={handleStopRecording} size="lg" className="rounded-full w-24 h-24 bg-accent hover:bg-accent/90" aria-label="Stop recording">
+          <Button onClick={handleStopRecording} size="lg" className="rounded-full w-24 h-24 bg-accent hover:bg-accent/90" aria-label={title}>
             <StopCircle className="h-12 w-12" />
           </Button>
         );
@@ -117,7 +136,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
         );
       default:
         return (
-          <Button onClick={handleStartRecording} size="lg" className="rounded-full w-24 h-24" aria-label="Start recording">
+          <Button onClick={handleStartRecording} size="lg" className="rounded-full w-24 h-24" disabled={isDisabled} aria-label={title}>
             <Mic className="h-12 w-12" />
           </Button>
         );
@@ -126,6 +145,15 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
 
   return (
     <div className="w-full space-y-6">
+       {hasMicPermission === false && (
+         <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+           <AlertTitle>Microphone Access Required</AlertTitle>
+           <AlertDescription>
+             This app needs access to your microphone to record audio. Please check your browser settings and grant permission.
+           </AlertDescription>
+         </Alert>
+       )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="font-headline text-2xl flex items-center gap-2">
@@ -150,7 +178,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
               transition={{ duration: 0.2 }}
             >
               <p className="text-2xl font-light text-center leading-relaxed p-4 min-h-[100px]">
-                {showSwahili ? prompt.swahili : prompt.english}
+                {showSwahili ? prompt.otherLanguage : prompt.english}
               </p>
             </motion.div>
           </AnimatePresence>
