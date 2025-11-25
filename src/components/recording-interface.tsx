@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useAuth, useFirebase, useUser } from "@/firebase";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection } from "firebase/firestore";
+import Waveform from "./waveform";
 
 type RecordingStatus = "idle" | "recording" | "processing" | "recorded" | "uploading" | "uploaded";
 
@@ -26,7 +27,6 @@ const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.le
 
 export default function RecordingInterface({ userData, onStartOver }: RecordingInterfaceProps) {
   const [prompt, setPrompt] = useState<Prompt>(() => getRandomItem(prompts));
-  const [showSwahili, setShowSwahili] = useState(false);
   const { toast } = useToast();
 
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
@@ -209,9 +209,6 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
             <FileText className="text-primary"/> Read the Prompt
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setShowSwahili(!showSwahili)} aria-label="Toggle language">
-              <Languages className="h-5 w-5"/>
-            </Button>
             <Button variant="ghost" size="icon" onClick={nextPrompt} aria-label="Next prompt">
               <SkipForward className="h-5 w-5"/>
             </Button>
@@ -220,14 +217,14 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
         <CardContent>
           <AnimatePresence mode="wait">
             <motion.div
-              key={prompt.id + (showSwahili ? '-sw' : '-en')}
+              key={prompt.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
               <p className="text-2xl font-light text-center leading-relaxed p-4 min-h-[100px]">
-                {showSwahili ? prompt.otherLanguage : prompt.english}
+                {prompt.english}
               </p>
             </motion.div>
           </AnimatePresence>
@@ -259,7 +256,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
       </div>
 
       <AnimatePresence>
-      {(recordingStatus === "recorded" || recordingStatus === "uploaded") && audioUrl && (
+      {(recordingStatus === "recorded" || recordingStatus === "uploaded") && audioBlob && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,8 +269,9 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
                 <Mic className="text-primary" /> Your Recording
               </CardTitle>
             </CardHeader>
-            <CardContent>
-                <audio src={audioUrl} controls className="w-full" />
+            <CardContent className="space-y-4">
+              {audioUrl && <audio src={audioUrl} controls className="w-full" />}
+              <Waveform audioBlob={audioBlob} className="w-full h-[60px]" barColor="hsl(var(--primary))" />
               <div className="flex justify-between items-center gap-2 mt-4">
                 <Button variant="outline" onClick={nextPrompt} disabled={recordingStatus === 'uploading'}>
                   <RefreshCw className="mr-2 h-4 w-4" /> Discard & Try New Prompt

@@ -77,5 +77,17 @@ export const prompts: Prompt[] = [
     type: 'text',
     english: 'This trotro is too slow.',
     otherLanguage: 'Saa trotro yi yɛ slow dodo.',
+  },
+  {
+    id: 13,
+    type: 'text',
+    english: 'Adey go town come.',
+    otherLanguage: 'Merekɔ kurom aba.',
+  },
+  {
+    id: 14,
+    type: 'text',
+    english: 'Please come sesiaa.',
+    otherLanguage: 'Mepa wo kyɛw, bra seesei ara.',
   }
 ];
