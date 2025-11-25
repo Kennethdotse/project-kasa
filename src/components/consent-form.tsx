@@ -20,11 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { BookOpen, ShieldCheck } from 'lucide-react';
+import { BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
+import { Input } from "./ui/input";
 
 export type UserData = {
   ageRange: string;
   dataUsage: string;
+  isMinor: boolean;
+  guardianName?: string;
+  guardianRelationship?: string;
 };
 
 type ConsentFormProps = {
@@ -35,12 +39,17 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
   const [ageRange, setAgeRange] = useState("");
   const [dataUsage, setDataUsage] = useState("");
   const [hasConsented, setHasConsented] = useState(false);
+  const [isMinor, setIsMinor] = useState(false);
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianRelationship, setGuardianRelationship] = useState('');
+  const [guardianConsented, setGuardianConsented] = useState(false);
 
-  const isFormComplete = ageRange && dataUsage && hasConsented;
+  const isMinorFormComplete = isMinor ? guardianName && guardianRelationship && guardianConsented : true;
+  const isFormComplete = ageRange && dataUsage && hasConsented && isMinorFormComplete;
 
   const handleSubmit = () => {
     if (isFormComplete) {
-      onSubmit({ ageRange, dataUsage });
+      onSubmit({ ageRange, dataUsage, isMinor, guardianName, guardianRelationship });
     }
   };
 
@@ -69,6 +78,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
                 <SelectValue placeholder="Select your age range" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="under-18">Under 18 (Minor)</SelectItem>
                 <SelectItem value="18-24">18-24</SelectItem>
                 <SelectItem value="25-34">25-34</SelectItem>
                 <SelectItem value="35-44">35-44</SelectItem>
@@ -97,6 +107,49 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
             </RadioGroup>
           </div>
         </div>
+
+        <div className="flex items-start space-x-3">
+          <Checkbox id="is-minor-checkbox" checked={isMinor} onCheckedChange={(checked) => setIsMinor(Boolean(checked))} className="mt-1" />
+           <div className="grid gap-1.5 leading-none">
+             <label
+              htmlFor="is-minor-checkbox"
+              className="font-medium cursor-pointer"
+            >
+              Are you participating with a minor?
+            </label>
+             <p className="text-sm text-muted-foreground">
+              Check this box if you are a parent or guardian providing consent for a minor.
+            </p>
+          </div>
+        </div>
+
+        {isMinor && (
+           <div className="space-y-4 rounded-lg border p-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2"><UserCheck className="text-primary"/>Guardian Information</h3>
+             <div className="space-y-2">
+               <Label htmlFor="guardian-name">Guardian&apos;s Full Name</Label>
+               <Input id="guardian-name" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} placeholder="Enter guardian's name" />
+            </div>
+             <div className="space-y-2">
+               <Label htmlFor="guardian-relationship">Relationship to Minor</Label>
+               <Input id="guardian-relationship" value={guardianRelationship} onChange={(e) => setGuardianRelationship(e.target.value)} placeholder="e.g., Parent, Guardian" />
+            </div>
+             <div className="flex items-start space-x-3 mt-4">
+              <Checkbox id="guardian-consent" checked={guardianConsented} onCheckedChange={(checked) => setGuardianConsented(Boolean(checked))} className="mt-1" />
+               <div className="grid gap-1.5 leading-none">
+                 <label
+                  htmlFor="guardian-consent"
+                  className="font-medium cursor-pointer"
+                >
+                  Guardian Consent
+                </label>
+                 <p className="text-sm text-muted-foreground">
+                  I, the parent or legal guardian, give my consent for this minor to participate in the study.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-start space-x-3 rounded-lg border p-4">
           <Checkbox id="consent" checked={hasConsented} onCheckedChange={(checked) => setHasConsented(Boolean(checked))} className="mt-1" />

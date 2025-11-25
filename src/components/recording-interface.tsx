@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw, AlertCircle } from "lucide-react";
+import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw, AlertCircle, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,8 +11,11 @@ import { prompts, type Prompt } from "@/lib/prompts";
 import { useToast } from "@/hooks/use-toast";
 import { type UserData } from "./consent-form";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth, useFirebase, useUser } from "@/firebase";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { addDoc, collection } from "firebase/firestore";
 
-type RecordingStatus = "idle" | "recording" | "processing" | "recorded";
+type RecordingStatus = "idle" | "recording" | "processing" | "recorded" | "uploading" | "uploaded";
 
 type RecordingInterfaceProps = {
   userData: UserData;
@@ -23,19 +26,22 @@ const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.le
 
 export default function RecordingInterface({ userData, onStartOver }: RecordingInterfaceProps) {
   const [prompt, setPrompt] = useState<Prompt>(() => getRandomItem(prompts));
-  const [showSwahili, setShowSwahili] = useState(false); // Note: The prompt data now uses 'otherLanguage'
+  const [showSwahili, setShowSwahili] = useState(false);
   const { toast } = useToast();
 
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const [hasMicPermission, setHasMicPermission] = useState<boolean | null>(null);
 
+  const { user, loading: userLoading } = useUser();
+  const { firestore } = useFirebase();
+
   const imagePrompt = PlaceHolderImages.find(img => img.id === 'ghana-market-1');
 
-  // Request microphone permission on component mount
   useEffect(() => {
     const getMicPermission = async () => {
       try {
@@ -55,7 +61,6 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
 
     getMicPermission();
 
-    // Cleanup function to stop media stream
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
@@ -64,8 +69,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
         URL.revokeObjectURL(audioUrl);
       }
     };
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast, audioUrl]);
 
   const handleStartRecording = () => {
     if (recordingStatus === "recording" || !streamRef.current || !hasMicPermission) return;
@@ -73,11 +77,11 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
+      setAudioBlob(null);
     }
     setRecordingStatus("recording");
     audioChunksRef.current = [];
 
-    // Re-use the existing stream
     mediaRecorderRef.current = new MediaRecorder(streamRef.current);
 
     mediaRecorderRef.current.ondataavailable = (event) => {
@@ -88,11 +92,11 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
 
     mediaRecorderRef.current.onstop = () => {
       setRecordingStatus("processing");
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      const url = URL.createObjectURL(audioBlob);
+      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const url = URL.createObjectURL(blob);
+      setAudioBlob(blob);
       setAudioUrl(url);
       setRecordingStatus("recorded");
-      // We don't stop the tracks here anymore, so the stream can be reused.
     };
 
     mediaRecorderRef.current.start();
@@ -107,19 +111,63 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
   const nextPrompt = () => {
     setPrompt(getRandomItem(prompts.filter(p => p.id !== prompt.id)));
     setRecordingStatus("idle");
+    setAudioBlob(null);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
   };
 
+  const handleUpload = async () => {
+    if (!audioBlob || !user || !firestore) return;
+
+    setRecordingStatus("uploading");
+    const storage = getStorage();
+    const recordingId = `${user.uid}_${Date.now()}.webm`;
+    const storageRef = ref(storage, `recordings/${recordingId}`);
+
+    try {
+      await uploadBytes(storageRef, audioBlob);
+      const recordingPath = storageRef.fullPath;
+
+      const userRecordingsRef = collection(firestore, 'users', user.uid, 'recordings');
+      await addDoc(userRecordingsRef, {
+        ...userData,
+        prompt: {
+          id: prompt.id,
+          type: prompt.type,
+          english: prompt.english,
+          otherLanguage: prompt.otherLanguage,
+        },
+        audioPath: recordingPath,
+        createdAt: new Date(),
+      });
+      
+      setRecordingStatus("uploaded");
+      toast({
+        title: "Upload Successful!",
+        description: "Your recording has been saved. Thank you for your contribution!",
+      });
+      setTimeout(nextPrompt, 2000);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: "There was a problem saving your recording. Please try again.",
+      });
+      setRecordingStatus("recorded");
+    }
+  };
+
+
   const RecordButton = () => {
-    const isDisabled = hasMicPermission === false || hasMicPermission === null;
+    const isDisabled = hasMicPermission === false || userLoading;
     let title = "Start recording";
-    if (isDisabled) title = "Microphone not available";
+    if (isDisabled) title = "Microphone not available or still loading";
     if (recordingStatus === 'recording') title = "Stop recording";
     if (recordingStatus === 'processing') title = "Processing...";
-
+    if (recordingStatus === 'uploading') title = "Uploading...";
 
     switch (recordingStatus) {
       case "recording":
@@ -129,6 +177,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
           </Button>
         );
       case "processing":
+      case "uploading":
         return (
           <Button size="lg" className="rounded-full w-24 h-24" disabled>
             <Loader className="h-12 w-12 animate-spin" />
@@ -210,7 +259,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
       </div>
 
       <AnimatePresence>
-      {recordingStatus === "recorded" && audioUrl && (
+      {(recordingStatus === "recorded" || recordingStatus === "uploaded") && audioUrl && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -226,15 +275,14 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
             <CardContent>
                 <audio src={audioUrl} controls className="w-full" />
               <div className="flex justify-between items-center gap-2 mt-4">
-                <Button variant="outline" onClick={nextPrompt}>
-                  <RefreshCw className="mr-2 h-4 w-4" /> Try another prompt
+                <Button variant="outline" onClick={nextPrompt} disabled={recordingStatus === 'uploading'}>
+                  <RefreshCw className="mr-2 h-4 w-4" /> Discard & Try New Prompt
                 </Button>
-                <Button asChild>
-                  <a href={audioUrl} download={`recording-${new Date().toISOString()}.webm`}>
-                    Download
-                  </a>
+                <Button onClick={handleUpload} disabled={recordingStatus === 'uploading' || recordingStatus === 'uploaded'}>
+                  <UploadCloud className="mr-2 h-4 w-4" /> Submit Recording
                 </Button>
               </div>
+               {recordingStatus === "uploaded" && <p className="text-green-600 text-center mt-4">Upload successful! Loading next prompt...</p>}
             </CardContent>
           </Card>
         </motion.div>

@@ -54,4 +54,28 @@ export const prompts: Prompt[] = [
     english: 'This fufu is very delicious.',
     otherLanguage: 'Saa fufuo yi yɛ dɛ paa.',
   },
+  {
+    id: 9,
+    type: 'text',
+    english: 'I will go and come back.',
+    otherLanguage: 'Mɛkɔ na maba.',
+  },
+  {
+    id: 10,
+    type: 'text',
+    english: 'Please give me water to drink.',
+    otherLanguage: 'Mepa wo kyɛw, ma me nsuo menom.',
+  },
+  {
+    id: 11,
+    type: 'text',
+    english: 'Chale, let\'s go to the party.',
+    otherLanguage: 'Chale, yɛnkɔ party no.',
+  },
+  {
+    id: 12,
+    type: 'text',
+    english: 'This trotro is too slow.',
+    otherLanguage: 'Saa trotro yi yɛ slow dodo.',
+  }
 ];
