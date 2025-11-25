@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'AfriVoice Collect',
+  title: 'Project Kasa',
   description: 'Contribute to the future of African language technology.',
 };
 

@@ -59,7 +59,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
         <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
           <Speech className="h-6 w-6 md:h-8 md:w-8 text-primary" />
         </div>
-        <CardTitle className="font-headline text-2xl md:text-3xl">Welcome to AfriVoice Collect</CardTitle>
+        <CardTitle className="font-headline text-2xl md:text-3xl">Welcome to Project Kasa</CardTitle>
         <CardDescription className="text-base md:text-lg">
           Help us build the future of African language technology.
         </CardDescription>
