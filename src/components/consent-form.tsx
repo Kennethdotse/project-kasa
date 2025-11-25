@@ -57,20 +57,20 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
     <Card className="w-full shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
-          <BookOpen className="h-8 w-8 text-primary" />
+          <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-primary" />
         </div>
-        <CardTitle className="font-headline text-3xl">Welcome to AfriVoice Collect</CardTitle>
-        <CardDescription className="text-lg">
+        <CardTitle className="font-headline text-2xl md:text-3xl">Welcome to AfriVoice Collect</CardTitle>
+        <CardDescription className="text-base md:text-lg">
           Help us build the future of African language technology.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2 text-center text-muted-foreground">
+        <div className="space-y-2 text-center text-muted-foreground text-sm md:text-base">
           <p>This study aims to collect speech data to improve technology's understanding and generation of diverse African languages. Your contribution is invaluable.</p>
         </div>
         
         <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="font-semibold text-lg flex items-center gap-2"><ShieldCheck className="text-primary"/>Your Information</h3>
+          <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><ShieldCheck className="text-primary h-5 w-5"/>Your Information</h3>
           <div className="space-y-2">
             <Label htmlFor="age-range">Age Range</Label>
             <Select onValueChange={setAgeRange} value={ageRange}>
@@ -94,15 +94,15 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
             <RadioGroup onValueChange={setDataUsage} value={dataUsage} className="gap-3 pt-1">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="research_only" id="r1" />
-                <Label htmlFor="r1" className="font-normal cursor-pointer">For research purposes only</Label>
+                <Label htmlFor="r1" className="font-normal cursor-pointer text-sm md:text-base">For research purposes only</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="open_dataset" id="r2" />
-                <Label htmlFor="r2" className="font-normal cursor-pointer">Include in a public, open-source dataset</Label>
+                <Label htmlFor="r2" className="font-normal cursor-pointer text-sm md:text-base">Include in a public, open-source dataset</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="model_training" id="r3" />
-                <Label htmlFor="r3" className="font-normal cursor-pointer">Use for model training (data will not be released)</Label>
+                <Label htmlFor="r3" className="font-normal cursor-pointer text-sm md:text-base">Use for model training (data will not be released)</Label>
               </div>
             </RadioGroup>
           </div>
@@ -113,7 +113,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
            <div className="grid gap-1.5 leading-none">
              <label
               htmlFor="is-minor-checkbox"
-              className="font-medium cursor-pointer"
+              className="font-medium cursor-pointer text-sm md:text-base"
             >
               Are you participating with a minor?
             </label>
@@ -125,7 +125,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
 
         {isMinor && (
            <div className="space-y-4 rounded-lg border p-4">
-            <h3 className="font-semibold text-lg flex items-center gap-2"><UserCheck className="text-primary"/>Guardian Information</h3>
+            <h3 className="font-semibold text-base md:text-lg flex items-center gap-2"><UserCheck className="text-primary h-5 w-5"/>Guardian Information</h3>
              <div className="space-y-2">
                <Label htmlFor="guardian-name">Guardian&apos;s Full Name</Label>
                <Input id="guardian-name" value={guardianName} onChange={(e) => setGuardianName(e.target.value)} placeholder="Enter guardian's name" />
@@ -139,7 +139,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
                <div className="grid gap-1.5 leading-none">
                  <label
                   htmlFor="guardian-consent"
-                  className="font-medium cursor-pointer"
+                  className="font-medium cursor-pointer text-sm md:text-base"
                 >
                   Guardian Consent
                 </label>
@@ -156,7 +156,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
           <div className="grid gap-1.5 leading-none">
             <label
               htmlFor="consent"
-              className="font-medium cursor-pointer"
+              className="font-medium cursor-pointer text-sm md:text-base"
             >
               Informed Consent
             </label>
@@ -168,7 +168,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
       </CardContent>
       <CardFooter>
         <Button
-          className="w-full text-lg py-6"
+          className="w-full text-base md:text-lg py-5 md:py-6"
           onClick={handleSubmit}
           disabled={!isFormComplete}
         >

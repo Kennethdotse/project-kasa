@@ -11,7 +11,7 @@ import { prompts, type Prompt } from "@/lib/prompts";
 import { useToast } from "@/hooks/use-toast";
 import { type UserData } from "./consent-form";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth, useFirebase, useUser } from "@/firebase";
+import { useFirebase, useUser } from "@/firebase";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { addDoc, collection } from "firebase/firestore";
 import Waveform from "./waveform";
@@ -172,21 +172,21 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
     switch (recordingStatus) {
       case "recording":
         return (
-          <Button onClick={handleStopRecording} size="lg" className="rounded-full w-24 h-24 bg-accent hover:bg-accent/90" aria-label={title}>
-            <StopCircle className="h-12 w-12" />
+          <Button onClick={handleStopRecording} size="lg" className="rounded-full w-20 h-20 md:w-24 md:h-24 bg-accent hover:bg-accent/90" aria-label={title}>
+            <StopCircle className="h-10 w-10 md:h-12 md:w-12" />
           </Button>
         );
       case "processing":
       case "uploading":
         return (
-          <Button size="lg" className="rounded-full w-24 h-24" disabled>
-            <Loader className="h-12 w-12 animate-spin" />
+          <Button size="lg" className="rounded-full w-20 h-20 md:w-24 md:h-24" disabled>
+            <Loader className="h-10 w-10 md:h-12 md:w-12 animate-spin" />
           </Button>
         );
       default:
         return (
-          <Button onClick={handleStartRecording} size="lg" className="rounded-full w-24 h-24" disabled={isDisabled} aria-label={title}>
-            <Mic className="h-12 w-12" />
+          <Button onClick={handleStartRecording} size="lg" className="rounded-full w-20 h-20 md:w-24 md:h-24" disabled={isDisabled} aria-label={title}>
+            <Mic className="h-10 w-10 md:h-12 md:w-12" />
           </Button>
         );
     }
@@ -205,8 +205,8 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
        )}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="font-headline text-2xl flex items-center gap-2">
-            <FileText className="text-primary"/> Read the Prompt
+          <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
+            <FileText className="text-primary h-5 w-5"/> Read the Prompt
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={nextPrompt} aria-label="Next prompt">
@@ -223,7 +223,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-2xl font-light text-center leading-relaxed p-4 min-h-[100px]">
+              <p className="text-xl md:text-2xl font-light text-center leading-relaxed p-4 min-h-[100px]">
                 {prompt.english}
               </p>
             </motion.div>
@@ -234,7 +234,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
       {prompt.type === 'image' && imagePrompt && (
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">...or Describe the Picture</CardTitle>
+            <CardTitle className="font-headline text-xl md:text-2xl">...or Describe the Picture</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-hidden rounded-lg">
@@ -265,18 +265,18 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
         >
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                <Mic className="text-primary" /> Your Recording
+              <CardTitle className="font-headline text-xl md:text-2xl flex items-center gap-2">
+                <Mic className="text-primary h-5 w-5" /> Your Recording
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {audioUrl && <audio src={audioUrl} controls className="w-full" />}
               <Waveform audioBlob={audioBlob} className="w-full h-[60px]" barColor="hsl(var(--primary))" />
-              <div className="flex justify-between items-center gap-2 mt-4">
-                <Button variant="outline" onClick={nextPrompt} disabled={recordingStatus === 'uploading'}>
-                  <RefreshCw className="mr-2 h-4 w-4" /> Discard & Try New Prompt
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-2 mt-4">
+                <Button variant="outline" onClick={nextPrompt} disabled={recordingStatus === 'uploading'} className="w-full sm:w-auto">
+                  <RefreshCw className="mr-2 h-4 w-4" /> Discard & Try Again
                 </Button>
-                <Button onClick={handleUpload} disabled={recordingStatus === 'uploading' || recordingStatus === 'uploaded'}>
+                <Button onClick={handleUpload} disabled={recordingStatus === 'uploading' || recordingStatus === 'uploaded'} className="w-full sm:w-auto">
                   <UploadCloud className="mr-2 h-4 w-4" /> Submit Recording
                 </Button>
               </div>
