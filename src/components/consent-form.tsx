@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { BookOpen, ShieldCheck, UserCheck } from 'lucide-react';
+import { Speech, ShieldCheck, UserCheck } from 'lucide-react';
 import { Input } from "./ui/input";
 
 export type UserData = {
@@ -57,7 +57,7 @@ export default function ConsentForm({ onSubmit }: ConsentFormProps) {
     <Card className="w-full shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit mb-2">
-          <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+          <Speech className="h-6 w-6 md:h-8 md:w-8 text-primary" />
         </div>
         <CardTitle className="font-headline text-2xl md:text-3xl">Welcome to AfriVoice Collect</CardTitle>
         <CardDescription className="text-base md:text-lg">
