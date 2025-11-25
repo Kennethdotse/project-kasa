@@ -2,18 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Mic, StopCircle, Bot, Loader, RefreshCw, LogOut, SkipForward, FileText, Languages } from "lucide-react";
+import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { prompts, type Prompt } from "@/lib/prompts";
-import { transcribeRecording } from "@/ai/flows/transcribe-recording";
 import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/ui/textarea";
 import { type UserData } from "./consent-form";
 import { AnimatePresence, motion } from "framer-motion";
 
-type RecordingStatus = "idle" | "recording" | "processing" | "success" | "error";
+type RecordingStatus = "idle" | "recording" | "processing" | "recorded";
 
 type RecordingInterfaceProps = {
   userData: UserData;
@@ -28,24 +26,30 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
   const { toast } = useToast();
 
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
-  const [transcription, setTranscription] = useState("");
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
   const imagePrompt = PlaceHolderImages.find(img => img.id === 'afrivoice-prompt-1');
 
   useEffect(() => {
-    // Cleanup function to stop media stream if component unmounts
+    // Cleanup function to stop media stream and revoke URL
     return () => {
       if (mediaRecorderRef.current?.stream) {
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       }
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
     };
-  }, []);
+  }, [audioUrl]);
 
   const handleStartRecording = async () => {
     if (recordingStatus === "recording") return;
-    setTranscription("");
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
     setRecordingStatus("recording");
     audioChunksRef.current = [];
 
@@ -59,24 +63,12 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
         }
       };
 
-      mediaRecorderRef.current.onstop = async () => {
+      mediaRecorderRef.current.onstop = () => {
         setRecordingStatus("processing");
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-
-        try {
-          const audioDataUri = await blobToDataURL(audioBlob);
-          const result = await transcribeRecording({ audioDataUri });
-          setTranscription(result.transcription);
-          setRecordingStatus("success");
-        } catch (error) {
-          console.error("Transcription error:", error);
-          toast({
-            variant: "destructive",
-            title: "Transcription Failed",
-            description: "Could not process the audio. Please try again.",
-          });
-          setRecordingStatus("error");
-        }
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        setRecordingStatus("recorded");
         
         // Stop all media tracks after processing is done
         stream.getTracks().forEach(track => track.stop());
@@ -99,20 +91,14 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
       mediaRecorderRef.current.stop();
     }
   };
-
-  const blobToDataURL = (blob: Blob): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
   
   const nextPrompt = () => {
     setPrompt(getRandomItem(prompts.filter(p => p.id !== prompt.id)));
-    setTranscription("");
     setRecordingStatus("idle");
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
+    }
   };
 
   const RecordButton = () => {
@@ -196,7 +182,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
       </div>
 
       <AnimatePresence>
-      {(recordingStatus === "success" || recordingStatus === "error") && transcription && (
+      {recordingStatus === "recorded" && audioUrl && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,18 +192,19 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
           <Card>
             <CardHeader>
               <CardTitle className="font-headline text-2xl flex items-center gap-2">
-                <Bot className="text-primary" /> AI Transcription
+                <Mic className="text-primary" /> Your Recording
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                readOnly
-                value={transcription}
-                className="min-h-[120px] text-base bg-background"
-              />
-              <div className="flex justify-end gap-2 mt-4">
+                <audio src={audioUrl} controls className="w-full" />
+              <div className="flex justify-between items-center gap-2 mt-4">
                 <Button variant="outline" onClick={nextPrompt}>
                   <RefreshCw className="mr-2 h-4 w-4" /> Try another prompt
+                </Button>
+                <Button asChild>
+                  <a href={audioUrl} download={`recording-${new Date().toISOString()}.webm`}>
+                    Download
+                  </a>
                 </Button>
               </div>
             </CardContent>
