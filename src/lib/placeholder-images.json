@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "ghana-market-1",
+      "description": "A bustling, colorful market scene in Accra, Ghana, with vendors selling fresh produce and textiles.",
+      "imageUrl": "https://images.unsplash.com/photo-1594480852445-3b6d057d14c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaGFuYSUyMG1hcmtldCUyMHNjZW5lfGVufDB8fHx8MTcyMDY1MzQ1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Ghana market"
+    },
+    {
+      "id": "ghana-weaving-1",
+      "description": "A Ghanaian woman weaving traditional Kente cloth on a loom.",
+      "imageUrl": "https://images.unsplash.com/photo-1618828292224-818f2434c4e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaGFuYSUyMHdlYXZpbmd8ZW58MHx8fHwxNzIxMjUzNjU5fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "Ghana weaving"
+    },
+    {
+      "id": "ghana-food-1",
+      "description": "A close-up shot of a delicious-looking plate of Jollof rice, a popular West African dish, garnished with fried plantains.",
+      "imageUrl": "https://images.unsplash.com/photo-1599991515087-9f79b5b2a95c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnaGFuYSUyMGZvb2R8ZW58MHx8fHwxNzIxMjUzNjc5fDA&ixlib=rb-4.0.3&q=80&w=1080",
+      "imageHint": "Ghana food"
+    }
+  ]
+}

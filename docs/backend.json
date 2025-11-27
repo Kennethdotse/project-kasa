@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "Represents a data contributor.",
+      "type": "object",
+      "properties": {
+        "ageRange": {
+          "type": "string",
+          "description": "The age range of the user."
+        },
+        "dataUsage": {
+          "type": "string",
+          "description": "The data usage consent from the user."
+        },
+        "isMinor": {
+          "type": "boolean",
+          "description": "Whether the user is a minor."
+        },
+        "guardianName": {
+          "type": "string",
+          "description": "The name of the guardian if the user is a minor."
+        },
+        "guardianRelationship": {
+          "type": "string",
+          "description": "The guardian's relationship to the minor."
+        }
+      }
+    },
+    "recording": {
+      "title": "Recording",
+      "description": "Represents a voice recording.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who made the recording."
+        },
+        "prompt": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "number" },
+            "type": { "type": "string" },
+            "english": { "type": "string" },
+            "otherLanguage": { "type": "string" }
+          },
+          "description": "The prompt text the user was asked to read."
+        },
+        "audioPath": {
+          "type": "string",
+          "description": "The path to the audio file in Firebase Storage."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the recording was created."
+        },
+        "deviceInfo": {
+          "type": "string",
+          "description": "User-Agent string of the client device."
+        },
+        "accent": {
+          "type": ["string", "null"],
+          "description": "The speaker's accent, if specified."
+        },
+        "codeSwitching": {
+          "type": ["boolean", "null"],
+          "description": "Indicates if code-switching is present in the recording."
+        },
+        "impairmentType": {
+          "type": ["string", "null"],
+          "description": "Type of speech impairment, if any."
+        },
+        "ageRange": {
+          "type": "string",
+          "description": "The age range of the user."
+        },
+        "dataUsage": {
+          "type": "string",
+          "description": "The data usage consent from the user."
+        },
+        "isMinor": {
+          "type": "boolean",
+          "description": "Whether the user is a minor."
+        },
+        "guardianName": {
+          "type": ["string", "null"],
+          "description": "The name of the guardian if the user is a minor."
+        },
+        "guardianRelationship": {
+          "type": ["string", "null"],
+          "description": "The guardian's relationship to the minor."
+        }
+      },
+      "required": ["userId", "prompt", "audioPath", "createdAt", "deviceInfo"]
+    }
+  },
+  "auth": {
+    "providers": ["anonymous"]
+  },
+  "firestore": {
+    "/users/{userId}/recordings/{recordingId}": {
+      "schema": { "$ref": "#/entities/recording" },
+      "description": "Stores recordings for each user."
+    }
+  }
+}
