@@ -1,0 +1,17 @@
+torch
+torchaudio
+transformers
+datasets
+accelerate
+soundfile
+librosa
+jiwer
+pydub
+audiomentations
+noisereduce
+git+https://github.com/openai/whisper.git
+faster-whisper
+huggingface_hub
+sentencepiece
+evaluate
+onnxruntime-gpu
