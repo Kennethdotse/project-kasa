@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, Languages, RefreshCw, AlertCircle, UploadCloud } from "lucide-react";
+import { Mic, StopCircle, Loader, LogOut, SkipForward, FileText, RefreshCw, AlertCircle, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -132,15 +132,31 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
 
       const userRecordingsRef = collection(firestore, 'users', user.uid, 'recordings');
       await addDoc(userRecordingsRef, {
+        // Consent Info & User Metadata
         ...userData,
+        
+        // Speaker ID
+        userId: user.uid,
+
+        // Prompt Info
         prompt: {
           id: prompt.id,
           type: prompt.type,
           english: prompt.english,
           otherLanguage: prompt.otherLanguage,
         },
+
+        // Recording Info
         audioPath: recordingPath,
         createdAt: new Date(),
+        
+        // Device Info
+        deviceInfo: navigator.userAgent,
+        
+        // Labels (placeholders for now)
+        accent: null,
+        codeSwitching: null,
+        impairmentType: null,
       });
       
       setRecordingStatus("uploaded");
