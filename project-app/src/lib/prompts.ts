@@ -27,8 +27,8 @@ export const prompts: Prompt[] = [
   {
     id: 4,
     type: 'text',
-    english: 'My friend, charlie, how far?',
-    otherLanguage: 'Me nipa, charlie, yɛ sɛn?',
+    english: 'My friend, charle, how far?',
+    otherLanguage: 'Me nipa, charle, yɛ sɛn?',
   },
   {
     id: 5,

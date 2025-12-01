@@ -239,7 +239,7 @@ export default function RecordingInterface({ userData, onStartOver }: RecordingI
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <p className="text-xl md:text-2xl font-light text-center leading-relaxed p-4 min-h-[100px]">
+              <p className="text-xl md:text-2xl font-normal text-center leading-relaxed p-4 min-h-[100px]">
                 {prompt.english}
               </p>
             </motion.div>
