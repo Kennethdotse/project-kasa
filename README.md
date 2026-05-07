@@ -1,7 +1,7 @@
 # Kasanoma ASR
 
 ## Overview
-Kasanoma ASR is a research-focused speech recognition project for African languages and atypical speech. The goal is to enable personalized, code-switched, and edge-deployable ASR systems with a focus on English, Twi, Yoruba, and Ga.
+Kasanoma ASR is a research-focused speech recognition project for African languages and atypical speech. The goal is to enable personalized, code-switched, and edge-deployable ASR systems with a focus on English & Twi.
 
 ### Key objectives
 - Personalized ASR for atypical or disordered speech
@@ -33,7 +33,7 @@ from datasets import load_dataset
 
 # Authenticate with huggingface-cli or set HF_TOKEN
 dataset = load_dataset(
-    "Kennethdot/ghana-english-twi-codeswitch-asr",
+    "Kennethdot/Ghana_English-Twi_Code-switching_ASR",
     use_auth_token=True,
 )
 
@@ -43,9 +43,8 @@ print(dataset["train"][0])
 ### Expected format
 The dataset follows the standard Hugging Face speech format and includes fields such as:
 - `speaker_id`
-- `audio` (16 kHz waveform)
+- `audio` (48 kHz waveform)
 - `transcription`
-- `language` (e.g. `eng-twi`)
 - `gender`
 
 ## Repository structure
