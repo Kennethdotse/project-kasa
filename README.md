@@ -22,7 +22,7 @@ This dataset is hosted on Hugging Face as a gated repository. To access it:
 
 1. Create a Hugging Face account
 2. Request access on the repository page:
-   - https://huggingface.co/datasets/Kennethdot/ghana-english-twi-codeswitch-asr
+   - [https://huggingface.co/datasets/Kennethdot/ghana-english-twi-codeswitch-asr](https://huggingface.co/datasets/Kennethdot/Ghana_English-Twi_Code-switching_ASR)
 3. Use a Hugging Face access token during download
 
 ### Loading the dataset
